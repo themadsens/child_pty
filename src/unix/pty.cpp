@@ -45,8 +45,8 @@ applyws(struct winsize *w, v8::Handle<v8::Object> obj) {
 }
 
 NAN_METHOD(Resize) {
-	struct winsize w;
 	Nan::HandleScope scope;
+	struct winsize w;
 	makews(&w, info[1]);
 	v8::Handle<v8::Object> obj = info[0]->ToObject();
 	if(ioctl(obj->Get(Nan::New<v8::String>("master_fd").ToLocalChecked())->Uint32Value(), TIOCSWINSZ, &w) < 0)
@@ -56,10 +56,10 @@ NAN_METHOD(Resize) {
 }
 
 NAN_METHOD(Open) {
+	Nan::HandleScope scope;
 	struct winsize w;
 	int master, slave;
 	char *tty;
-	Nan::HandleScope scope;
 	v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 	makews(&w, info[0]);
 	if(openpty(&master, &slave, NULL, NULL, &w) < 0 ||
@@ -72,11 +72,4 @@ NAN_METHOD(Open) {
 	info.GetReturnValue().Set(obj);
 }
 
-void Init(v8::Handle<v8::Object> exports) {
-	v8::Handle<v8::Object> modes;
-
-	Nan::SetMethod(exports, "open", Open);
-	Nan::SetMethod(exports, "resize", Resize);
-}
-
-NODE_MODULE(pty, Init)
+#include "../pty_common.h"
